@@ -1,0 +1,363 @@
+///env
+PORT = 5858
+MONGO_URL = "mongodb+srv://admin:admin@cluster0.v8mcn.mongodb.net/bick-api?retryWrites=true&w=majority&appName=Cluster0"
+JWT_SECRET = abcd12345
+NODE_ENV = 'development'
+
+///dbconfig
+const mongoose = require("mongoose");
+
+const connectdb = async () => {
+try {
+const conn = await mongoose.connect(process.env.MONGO_URL);
+console.log(`db connect ho gya bhai:${conn.connection.name}`);
+} catch (error) {
+console.log(`db fail ho gya bhai:${error.message}`);
+}
+};
+module.exports = connectdb;
+
+///server js
+const express = require("express");
+const connectdb = require("./config/dbconfig");
+const errorhandler = require("./middleware/errorhandler");
+const app = express();
+require("dotenv").config();
+
+const port = process.env.PORT || 3000;
+
+connectdb();
+
+//body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+//api
+app.use("/api/user", require("./routes/userrouter"));
+
+//error handler
+app.use(errorhandler);
+
+//bike routes
+app.use("/api/bike", require("./routes/bikeroutes"));
+
+app.use("/api/admin/true", require("./routes/adminroute"));
+app.get("/", (req, res) => {
+res.json({
+msg: "welcome to bick api",
+});
+});
+
+app.listen(port, () => {
+console.log(`server is running on server : ${port}`);
+});
+
+///user route
+const express = require("express");
+const {
+registeruser,
+loginuser,
+privatecontra,
+} = require("../controller/usercontroller");
+const protect = require("../middleware/authmiddleware");
+
+const router = express.Router();
+
+router.post("/", registeruser);
+router.post("/login", loginuser);
+router.post("/private", protect, privatecontra);
+
+module.exports = router;
+
+///usercontroller.js
+const expressAsyncHandler = require("express-async-handler");
+const user = require("../models/usermodels");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const registeruser = expressAsyncHandler(async (req, res) => {
+const { name, email, password } = req.body;
+if (!name || !email || !password) {
+res.status(401);
+throw new Error("please fill all details");
+}
+const salt = bcrypt.genSaltSync(10);
+const hashpassword = bcrypt.hashSync("password", salt);
+const USER = await user.create({
+name,
+email,
+password: hashpassword,
+});
+
+res.status(201);
+res.json({
+id: USER.\_id,
+name: USER.name,
+email: USER.email,
+token: genratetoken(USER.\_id),
+});
+});
+
+const loginuser = expressAsyncHandler(async (req, res) => {
+const { email, password } = req.body;
+
+if (!email || !password) {
+res.status(401);
+throw new Error("please fill all details");
+}
+const USER = await user.findOne({ email });
+
+if (USER && bcrypt.compare(password, USER.password)) {
+res.status(200);
+res.json({
+id: USER.\_id,
+name: USER.name,
+email: USER.email,
+token: genratetoken(USER.\_id),
+});
+} else {
+res.status(400);
+throw new Error("invalid hai bhai");
+}
+});
+
+const privatecontra = expressAsyncHandler(async (req, res) => {
+res.json(req.customer);
+});
+
+// const privatecontra = async(req,res)=>{
+// res.json({
+// id: req.user.id,
+// name: req.user.name,
+// email: req.user.email,
+// })
+// }
+
+const genratetoken = (id) => {
+return jwt.sign({ id }, process.env.JWT_SECRET, {
+expiresIn: "30d",
+});
+};
+
+module.exports = { registeruser, loginuser, privatecontra };
+
+///usemodels
+const mongoose = require("mongoose");
+
+const userschema = new mongoose.Schema(
+{
+name: {
+type: String,
+require: true,
+},
+
+},
+{
+timestamps: true,
+}
+);
+
+module.exports = mongoose.model("User", userschema);
+////errorhandler.js
+const errorhandler = (err , req , res , next ) =>{
+const statusCode = res.statusCode <400 ? 500 : res.statusCode;
+res.status(statusCode);
+
+    res.json({
+     msg: err.message,
+     stack : process.env.NODE_ENV === "production" ? null : err.stack,
+    })
+
+};
+
+module.exports = errorhandler;  
+///auth middleware
+const expressAsyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const user = require("../models/usermodels");
+const protect = expressAsyncHandler(async (req, res, next) => {
+let token;
+
+if (
+req.headers.authorization &&
+req.headers.authorization.startsWith("Bearer")
+) {
+token = req.headers.authorization.split(" ")[1];
+try {
+const decoded = jwt.verify(token, process.env.JWT_SECRET);
+const customer = await user
+.findById(decoded.id)
+.select("-password")
+.select("-isadmin")
+.select("-createdAt")
+.select("-updatedAt");
+if (customer) {
+req.customer = customer;
+next();
+}
+} catch (error) {
+res.status(201);
+throw new Error("user not found");
+}
+} else {
+res.status(201);
+throw new Error("inavlid token");
+}
+});
+
+module.exports = protect;
+///bike models
+const mongoose = require("mongoose");
+
+const bikeschema = new mongoose.Schema(
+{
+user: {
+type: mongoose.Schema.Types.ObjectId,
+ref: "User",
+required: true,
+},
+bike: {
+type: String,
+enum: ["cd dawn", "luna", "hero", "r15", "rs200"],
+required: true,
+},
+image: { type: String, required: true, default: false },
+
+    registration: { type: String, required: true, unique: true },
+
+    description: { type: String, required: true },
+
+    status: {
+      type: String,
+      required: true,
+      enum: ["open", "close", "pending"],
+      defailt: "open",
+    },
+
+},
+{
+timestamps: true,
+}
+);
+
+module.exports = mongoose.model("bike", bikeschema);
+///bike consroller
+const expressAsyncHandler = require("express-async-handler");
+const bikemodel = require("../models/bikemodel");
+const usermodels = require("../models/usermodels");
+
+const addbike = expressAsyncHandler(async(req,res)=>{
+
+    const {bike , description , registration , image} = req.body
+
+    if (!bike || !description || !registration) {
+
+        res.status(400)
+        throw new Error("please fill all details")
+    }
+
+    const user = await usermodels.findById(req.customer._id.toString())
+
+    if(!user){
+        res.status(401)
+        throw new Error('user not found')
+    }
+
+    const newbike = await bikemodel.create({
+        user: user._id,
+        bike,
+        registration,
+        description,
+        image,
+        status: 'open',
+    });
+
+    if (!newbike){
+        res.status(400);
+        throw new Error("comlaint connot be raised");
+    }
+
+    res.status(201).json(newbike);
+
+});
+
+const getbikes = expressAsyncHandler(async(req,res)=>{
+
+    const user = await usermodels.findById(req.customer._id.toString())
+
+    if(!user){
+        res.status(401)
+        throw new Error('user not found')
+    }
+
+    //find bikes
+    const bikes = await bikemodel.find({user: user._id})
+
+    if (!bikes){
+        res.status(404);
+        throw new Error("bikes not found");
+    }
+
+    res.status(201).json(bikes);
+
+});
+
+const getbike = expressAsyncHandler(async(req,res)=>{
+const user = await usermodels.findById(req.customer.\_id.toString())
+
+    if(!user){
+        res.status(401)
+        throw new Error('user not found')
+    }
+
+    //find bike
+    const bike = await bikemodel.findById( req.params.id)
+
+    if (!bike){
+        res.status(404);
+        throw new Error("bikes not found");
+    }
+
+    res.status(201).json(bike);
+
+});
+
+const updatebike = expressAsyncHandler(async(req,res)=>{
+
+    const user = await usermodels.findById(req.customer._id.toString())
+
+    if(!user){
+        res.status(401)
+        throw new Error('user not found')
+    }
+    //find bike
+    const updatedbike = await bikemodel.findByIdAndUpdate(req.params.id , req.body ,{new : true})
+
+    if (!updatedbike){
+        res.status(404);
+        throw new Error("bikes not updated");
+    }
+    res.status(200).json(updatedbike);
+});
+
+module.exports = { addbike , getbikes , getbike , updatebike};
+///bike route
+const express = require("express");
+const protect = require("../middleware/authmiddleware");
+const {
+  addbike,
+  getbikes,
+  getbike,
+  updatebike,
+} = require("../controller/bikecontroller");
+
+const router = express.Router();
+
+router.route("/").post(protect, addbike).get(protect, getbikes);
+router.route("/:id").get(protect, getbike);
+
+router.put("/colse/:id", protect, updatebike);
+
+router.use("/:id/note", require("./noteroutes"));
+
+module.exports = router;

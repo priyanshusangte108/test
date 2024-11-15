@@ -1,0 +1,168 @@
+///server.js
+const express = require("express");
+const connectdb = require("./config/db-config");
+require("dotenv").config();
+
+const app = express();
+const PORT = process.env.PORT;
+
+//db connect
+connectdb();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// //todo routes
+app.use("/api/todo", require("./routes/todorouter"));
+
+//body for add
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (req, res) => {
+  res.json({
+    msg: " todo 1.0",
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`server is ready: ${PORT}`);
+});
+///db config
+const mongoose = require("mongoose");
+
+const connectdb = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`db success ho gya bhai:${conn.connection.name}`);
+  } catch (error) {
+    console.log(`fail ho gya bhai :${error.messgae}`);
+  }
+};
+module.exports = connectdb;
+///route
+const express = require("express");
+const {
+  gettodos,
+  addtodo,
+  gettodo,
+  updatetodo,
+  removetodo,
+} = require("../controler/todocontroller");
+
+const router = express.Router();
+
+router.get("/", gettodos);
+router.post("/", addtodo);
+router.get("/:id", gettodo);
+router.put("/:id", updatetodo);
+router.delete("/:id", removetodo);
+
+module.exports = router;
+///todo models
+const mongoose = require("mongoose");
+const todoschema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      required: true,
+    },
+
+    ispublished: {
+      type: Boolean,
+
+      default: false,
+    },
+
+    author: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+module.exports = mongoose.model("todo", todoschema);
+///todo controller
+
+const expressAsyncHandler = require("express-async-handler");
+const todo = require("../models/todomodel");
+
+//get all todo
+const gettodos = expressAsyncHandler(async (req, res) => {
+  const todos = await todo.find();
+
+  if (!todos) {
+    res.status(402);
+    throw new error("todo not found");
+  }
+  res.status(200).json(todos);
+});
+
+//get single todo
+const gettodo = expressAsyncHandler(async (req, res) => {
+  const todoing = await todo.findById(req.params.id);
+
+  if (!todo) {
+    res.status(404);
+    throw new error("todo not found");
+  }
+  res.status(200).json(todoing);
+});
+
+//add todo
+const addtodo = expressAsyncHandler(async (req, res) => {
+  const { title, description, author } = req.body;
+  const addTODO = await todo.create({
+    title,
+    description,
+    author,
+  });
+
+  res.json(addTODO);
+});
+//update todo
+const updatetodo = expressAsyncHandler(async (req, res) => {
+  const updatedtodo = await todo.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+
+  if (!updatedtodo) {
+    res.status(401);
+    throw new error("todo not updaded");
+  }
+  res.status(200).json(updatedtodo);
+});
+
+//remove todo
+const removetodo = expressAsyncHandler(async (req, res) => {
+  await todo.findByIdAndDelete(req.params.id);
+  res.json({
+    success: true,
+  });
+});
+
+module.exports = { gettodos, gettodo, addtodo, updatetodo, removetodo };
+///vite.config
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server:{
+    proxy:{
+      '/api' : {
+        target: "https://crud-api-mlhz.onrender.com",
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
+
+})

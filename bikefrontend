@@ -1,0 +1,252 @@
+///app.jsx
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />}></Route>
+        <Route path="/login" element={<Login />}></Route>
+        <Route path="/register" element={<Register />}></Route>
+        <Route path="/create" element={<Raisecomplaint />}></Route>
+        <Route path="/bikes" element={<Allcompalints />}></Route>
+       
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+///authslice
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import authservice from "./authservice";
+// import Logout from "../../pages/Logout";
+
+const userexist = JSON.parse(localStorage.getItem("user"));
+
+const authslice = createSlice({
+  name: "auth",
+  initialState: {
+    isloading: false,
+    issuccess: false,
+    iserror: false,
+    message: "",
+    user: userexist || null,
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(registeruser.pending, (state, action) => {
+        state.isloading = true;
+        state.issuccess = false;
+        state.iserror = false;
+      })
+      .addCase(registeruser.fulfilled, (state, action) => {
+        state.isloading = false;
+        state.issuccess = true;
+        state.iserror = false;
+        state.user = action.payload;
+      })
+      .addCase(registeruser.rejected, (state, action) => {
+        state.isloading = false;
+        state.issuccess = false;
+        state.iserror = true;
+        state.user = action.payload;
+      })
+
+      .addCase(loginuser.pending, (state, action) => {
+        state.isloading = true;
+        state.issuccess = false;
+        state.iserror = false;
+      })
+      .addCase(loginuser.fulfilled, (state, action) => {
+        state.isloading = false;
+        state.issuccess = false;
+        state.iserror = true;
+        state.user = action.payload;
+      })
+      .addCase(loginuser.rejected, (state, action) => {
+        state.isloading = false;
+        state.issuccess = true;
+        state.iserror = false;
+        state.user = action.payload;
+      })
+
+      .addCase(logoutuser.fulfilled, (state, action) => {
+        state.isloading = false;
+        state.issuccess = false;
+        state.iserror = false;
+        state.message = "";
+        state.user = null;
+      });
+  },
+});
+export const registeruser = createAsyncThunk(
+  "API/REGISTER",
+  async (formdata, thunkAPI) => {
+    try {
+      return await authservice.register(formdata);
+    } catch (error) {
+      const message = error.response.data.error;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const loginuser = createAsyncThunk(
+  "API/LOGIN",
+  async (formdata, thunkAPI) => {
+    try {
+      return await authservice.login(formdata);
+    } catch (error) {
+      const message = error.response.data.error;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+//logout
+export const logoutuser = createAsyncThunk(
+  "API/LOGOUT",
+  async (formdata, thunkAPI) => {}
+);
+
+export default authslice.reducer;
+///authservice
+import axios from "axios";
+
+const register = async (formdata) => {
+  try {
+    const response = await axios.post("/api/user", formdata);
+    localStorage.setItem("user", JSON.stringify(response.data));
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const login = async (formdata) => {
+  try {
+    const response = await axios.post("/api/user/login", formdata);
+    localStorage.setItem("user", JSON.stringify(response.data));
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const authservice = {
+  register,
+  login,
+};
+export default authservice;
+///store
+import { configureStore } from "@reduxjs/toolkit";
+import authslice from "./auth/authslice";
+import complaintslice from "./complaints/complaintsslice";
+// import noteslice form "./notes/noteslice"
+const store = configureStore({
+  reducer: {
+    auth: authslice,
+    complaint: complaintslice,
+    // notes: noteslice,
+  },
+});
+export default store;
+///register pages
+
+const Register = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+  
+    const { user, isloading, iserror, issuccess, message } = useSelector(
+      (state) => state.auth
+    );
+  
+    const [formdata, setformdata] = useState({
+      name: "",
+      email: "",
+      password: "",
+      password2: "",
+    });
+    const { name, email, password, password2 } = formdata;
+  
+    const handlechange = (e) => {
+      setformdata({
+        ...formdata,
+        [e.target.name]: e.target.value,
+      });
+    };
+  
+    const handlesubmit = (e) => {
+      e.preventDefault();
+      console.log(formdata);
+      if (password !== password2) {
+        prompt("please enter correct password");
+      }
+      dispatch(registeruser(formdata));
+    };
+  
+    useEffect(() => {
+      if (user) {
+        navigate("/");
+      }
+    }, [user]);
+  
+    if (isloading) {
+      return <Loading />;
+    }
+    ///login pages
+    
+const Login = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+  
+    const { user, isloading, iserror, issuccess, message } = useSelector(
+      (state) => state.auth
+    );
+  
+    const [formdata, setformdata] = useState({
+      email: "",
+      password: "",
+    });
+    const { email, password } = formdata;
+  
+    const handlechange = (e) => {
+      setformdata({
+        ...formdata,
+        [e.target.name]: e.target.value,
+      });
+    };
+  
+    const handlesubmit = (e) => {
+      e.preventDefault();
+      dispatch(loginuser(formdata));
+    };
+  
+    useEffect(() => {
+      if (user) {
+        navigate("/");
+      }
+    }, [user, issuccess, message, iserror]);
+  
+    if (isloading) {
+      return <Loading />;
+    }
+    ///vite config
+    import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:5858",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+});

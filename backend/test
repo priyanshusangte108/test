@@ -9,4 +9,201 @@ https://www.youtube.com/watch?v=9owWj_ph_70&list=WL&index=14
 https://www.youtube.com/watch?v=nVXMylmiU8U&list=WL&index=13
 https://www.youtube.com/watch?v=oY4ruMixXHA&list=WL&index=12
 https://www.youtube.com/watch?v=NGgF1bBt3z8&list=WL&index=11
-https://www.youtube.com/watch?v=lWRqDeS2m-g&list=WL&index=10
+https://www.youtube.com/watch?v=lWRqDeS2m-g&list=WL&index=10 
+
+Skinova Aesthetic Care Website - 30-Day Project Timeline
+Project Overview:
+The Skinova Aesthetic Care website will be a responsive and user-friendly platform for showcasing aesthetic treatments, allowing users to book appointments, and interact with the clinic's services easily. The website will also include an admin panel for managing treatments, users, and orders, and will integrate features such as Stripe payments, WhatsApp communication, and email notifications.
+
+Tech Stack:
+Frontend: React, TailwindCSS, Framer Motion, Axios, React Router
+
+Backend: Node.js, Express.js, MongoDB, JWT Authentication
+
+Extras: Stripe (payment gateway), Cloudinary (media storage), Animations, Admin Panel
+
+Additional Tools: Google Maps API (clinic location), WhatsApp API (messaging), Nodemailer (email confirmations)
+
+
+Day 1-5: Project Setup & Core Design
+Day 1: Project Initialization & Setup
+Set up project folder structure: Client (React) and Server (Node.js).
+
+Install necessary libraries: React, TailwindCSS, Framer Motion, Axios, React Router, and configure the development environment.
+
+Day 2: Backend Setup (Server & Database)
+Set up Express.js server and connect to MongoDB.
+
+Implement JWT Authentication for secure user registration and login.
+
+Day 3: Frontend Setup
+Set up the frontend with React and configure TailwindCSS for responsive design.
+
+Implement Framer Motion for animations (e.g., page transitions, hover effects).
+
+Day 4: Basic UI Design for Pages
+Build the Header, Footer, and main Content Area structure.
+
+Create the Hero Section and initial Treatment Cards layout (with images, brief descriptions).
+
+Day 5: Core Functionality Review & Refinement
+Review and test the setup so far (backend, frontend, and design) to ensure smooth integration and basic functioning.
+
+Day 6-10: User Authentication & Booking Flow
+Day 6: Authentication Backend
+Set up backend routes for User Authentication:
+
+/register: User registration.
+
+/login: User login.
+
+/me: Get user details (protected route).
+
+Day 7: Frontend - Authentication Pages
+Create Login and Register pages with animated transitions using Framer Motion.
+
+Implement JWT token storage in localStorage for session management.
+
+Day 8: Treatment Listing & Detail Page
+Fetch treatment data from the backend and display it on a Treatment Listing Page.
+
+Add hover animations for treatments, revealing short descriptions and pricing.
+
+Day 9: Online Appointment System - Frontend
+Build the appointment booking page allowing users to select treatments and available time slots.
+
+Integrate dynamic availability for each treatment (e.g., real-time calendar updates).
+
+Day 10: Stripe Payment Integration
+Set up Stripe test mode to process payments.
+
+Create a Checkout Page to capture payment details for booked appointments.
+
+Day 11-15: Advanced Features & Admin Panel Setup
+Day 11: Wishlist Feature - Backend
+Create Wishlist Model in the backend to allow users to save favorite treatments.
+
+Set up routes to add/remove treatments from the wishlist.
+
+Day 12: Wishlist Feature - Frontend
+Implement the Wishlist button (heart icon) on treatment cards.
+
+Build a Wishlist Page to view, manage, and remove saved treatments.
+
+Day 13: Email Confirmation (Nodemailer)
+Set up Nodemailer to send email confirmations to users upon appointment booking.
+
+Design a booking confirmation email with treatment details and appointment time.
+
+Day 14: WhatsApp Integration
+Implement WhatsApp API to allow users to directly contact Skinova through WhatsApp for inquiries or bookings.
+
+Display the WhatsApp icon on all treatment pages and contact sections.
+
+Day 15: Admin Panel Setup - Initial Version
+Set up the Admin Panel with a basic Sidebar and Dashboard layout.
+
+Create routes for the admin to view treatments, users, and appointments.
+
+Day 16-20: Treatment & Order Management
+Day 16: Admin Dashboard - Metrics
+Add key metrics to the Admin Dashboard such as:
+
+Total treatments available.
+
+Total number of orders (appointments).
+
+Total revenue from bookings.
+
+Day 17: Treatment Management - Admin Panel (CRUD)
+Implement CRUD operations for treatments in the admin panel.
+
+Admin can add, edit, or delete treatments with image uploads.
+
+Integrate Cloudinary for image and video handling in treatments.
+
+Day 18: Order Management - Admin Panel
+Develop an Order Management section to list all bookings.
+
+Admin can view details of each order, including treatment, user, and date.
+
+Add filtering by order status (Pending, Completed, etc.).
+
+Day 19: Admin Order Status Management
+Admin can update order statuses (Completed, Cancelled) from the Admin Panel.
+
+Implement email notifications to alert admins when new bookings are made.
+
+Day 20: Admin Panel Finalization
+Final refinements to the Admin Panel UI.
+
+Ensure smooth functionality for managing treatments and orders.
+
+Day 21-25: UI/UX Polish & Payment Integration
+Day 21: Stripe Payment Integration - Backend
+Integrate the backend payment processing with Stripe to handle real-time payments.
+
+Create API endpoints for Stripe payment session creation and confirm payment details.
+
+Day 22: Checkout & Payment Confirmation
+Finalize Checkout Page with Stripe payment integration.
+
+Show a confirmation page after successful payment, detailing the treatment and appointment time.
+
+Day 23: Mobile Responsiveness Testing
+Test the website's responsiveness across different devices (phones, tablets, desktops).
+
+Refine any layout or functionality issues to ensure smooth mobile performance.
+
+Day 24: Search Functionality
+Implement a search bar to allow users to filter treatments by name, category, or keywords.
+
+Day 25: UI/UX Polish
+Review overall UI/UX and improve visual elements like buttons, hover effects, animations, and layout.
+
+Focus on smooth user interactions and visual appeal.
+
+Day 26-30: Final Testing, Refinement & Launch
+Day 26: Performance Testing
+Test the website’s performance, focusing on page load times, image optimization, and overall speed.
+
+Implement any performance improvements (image compression, lazy loading, etc.).
+
+Day 27: Cross-Browser Compatibility
+Test the website across different browsers (Chrome, Firefox, Safari) to ensure compatibility.
+
+Fix any browser-specific issues related to layout or functionality.
+
+Day 28: Final Bug Fixes & Feature Refinement
+Review the entire site for any bugs or issues.
+
+Perform final feature testing (bookings, payments, admin panel, etc.) to ensure everything works smoothly.
+
+Day 29: Content & SEO Optimization
+Review all website content (text, images, videos) for accuracy and relevance.
+
+Implement SEO best practices such as title tags, meta descriptions, and image alt text.
+
+Day 30: Launch
+Deploy the website to production (Heroku, AWS, etc.).
+
+Perform final checks post-deployment to ensure everything functions correctly in the live environment.
+
+Launch Announcement: Announce the website launch through email, social media, etc.
+
+Final Deliverables:
+Fully Functional Website: Responsive design, treatment listings, booking flow, and payment system.
+
+Admin Panel: Secure login for admins to manage treatments, orders, and users.
+
+Payment Integration: Stripe for secure online payments.
+
+Email Notifications: Automated confirmation emails for users after booking an appointment.
+
+WhatsApp Integration: Instant messaging for customer inquiries and bookings.
+
+Responsive Design: Optimized for desktop, tablet, and mobile devices.
+
+SEO Optimized: Basic SEO for better search engine ranking.
+
+Final Testing: Cross-browser compatibility and mobile testing completed.
